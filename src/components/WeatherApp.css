@@ -1,0 +1,69 @@
+/* src/components/WeatherApp.css */
+
+.weather-app {
+    text-align: center;
+    margin: 20px;
+  }
+  
+  .weather-app form {
+    margin-bottom: 20px;
+  }
+  
+  .weather-app input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+  }
+  
+  .weather-app button {
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .weather-app button:hover {
+    background-color: #0056b3;
+  }
+  
+  .weather-app h3 {
+    margin-top: 20px;
+  }
+  
+  .weather-app p {
+    margin: 5px 0;
+  }
+
+.container-item {
+  flex: 1;
+  margin: 0 10px;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.container-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.view-more-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.view-more-button:hover {
+  background-color: #0056b3;
+}
