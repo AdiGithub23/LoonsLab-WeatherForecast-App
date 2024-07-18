@@ -4,6 +4,8 @@ import './WeatherApp.css'; // Make sure to create this CSS file for styling
 
 const WeatherApp = () => {
   const [city, setCity] = useState('Colombo');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
   const [weatherData, setWeatherData] = useState(null);
   const [forecastData, setForecastData] = useState([]);
   const [error, setError] = useState('');
@@ -11,18 +13,27 @@ const WeatherApp = () => {
   const [showFullForecast, setShowFullForecast] = useState(false);
   const [fullForecastData, setFullForecastData] = useState([]);
   
+  // const api_key = '2c53e16085916736c882d25b0b6326e6';
+  // const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${api_key}`;
+  // const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${api_key}`;
+
   const api_key = '2c53e16085916736c882d25b0b6326e6';
-  const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${api_key}`;
-  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${api_key}`;
+  const currentWeatherUrl = city
+    ? `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${api_key}`
+    : `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${api_key}`;
+  const forecastUrl = city
+    ? `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${api_key}`
+    : `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&units=metric&appid=${api_key}`;
+
 
   const fetchWeatherData = async () => {
-    if (!city) return;
+    if (!city && (!latitude || !longitude)) return;
 
     setLoading(true);
     setError('');
     try {
       const response = await fetch(currentWeatherUrl);
-      if (!response.ok) throw new Error('City not found');
+      if (!response.ok) throw new Error('Data not found');
       const data = await response.json();
       setWeatherData(data);
     } catch (err) {
@@ -33,24 +44,24 @@ const WeatherApp = () => {
   };
 
   const fetchForecastData = async () => {
-    if (!city) return;
+    if (!city && (!latitude || !longitude)) return;
 
     try {
-        const response = await fetch(forecastUrl);
-        if (!response.ok) throw new Error('City not found');
-        const data = await response.json();
-        
-        // Extract the forecast for the next 3 days
-        const dailyForecasts = data.list.filter((item, index) => index % 8 === 0); // 8 data points per day
-        setForecastData(dailyForecasts.slice(0, 3));
-        
-        // Extract the full forecast for the next 7 days
-        setFullForecastData(dailyForecasts);
-      } catch (err) {
-        setError(err.message);
-        setForecastData([]);
-        setFullForecastData([]);
-      }
+      const response = await fetch(forecastUrl);
+      if (!response.ok) throw new Error('Data not found');
+      const data = await response.json();
+      
+      // Extract the forecast for the next 3 days
+      const dailyForecasts = data.list.filter((item, index) => index % 8 === 0); // 8 data points per day
+      setForecastData(dailyForecasts.slice(0, 3));
+      
+      // Extract the full forecast for the next 7 days
+      setFullForecastData(dailyForecasts);
+    } catch (err) {
+      setError(err.message);
+      setForecastData([]);
+      setFullForecastData([]);
+    }
   };
 
   const formatDate = (date) => {
@@ -80,9 +91,11 @@ const WeatherApp = () => {
 
   // Fetch weather data for the default city on component mount
   useEffect(() => {
-    fetchWeatherData();
-    fetchForecastData();
-  }, []);
+    if (city || (latitude && longitude)) {
+      fetchWeatherData();
+      fetchForecastData();
+    }
+  }, [city, latitude, longitude]);
 
   const handleViewMore = () => {
     setShowFullForecast(!showFullForecast);
@@ -100,7 +113,20 @@ const WeatherApp = () => {
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="Enter city name"
-          required
+        />
+        <input
+          type="text"
+          value={latitude}
+          onChange={(e) => setLatitude(e.target.value)}
+          placeholder="Enter latitude"
+          pattern="^-?\d+(\.\d+)?$"
+        />
+        <input
+          type="text"
+          value={longitude}
+          onChange={(e) => setLongitude(e.target.value)}
+          placeholder="Enter longitude"
+          pattern="^-?\d+(\.\d+)?$"
         />
         <button type="submit">Search</button>
       </form>
@@ -110,6 +136,9 @@ const WeatherApp = () => {
       {weatherData && (
         <div>
           <h3>Current Weather in {weatherData.name}</h3>
+          <p>City: {weatherData.name}</p>
+          <p>Latitude: {weatherData.coord.lat}</p>
+          <p>Longitude: {weatherData.coord.lon}</p>
           <p>Weather: {weatherData.weather[0].description}</p>
           <p>Temperature: {weatherData.main.temp}°C</p>
           <p>Humidity: {weatherData.main.humidity}%</p>
@@ -120,7 +149,7 @@ const WeatherApp = () => {
           <div className="container-row">
             {(showFullForecast ? fullForecastData : forecastData).map((item, index) => (
               <div key={index} className="container-item">
-                <h4>{formatDate(new Date(item.dt_txt))}</h4>
+                <h4>{new Date(item.dt_txt).toLocaleDateString()}</h4>
                 <p>Weather: {item.weather[0].description}</p>
                 <p>Temperature: {item.main.temp}°C</p>
                 <p>Humidity: {item.main.humidity}%</p>
